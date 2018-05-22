@@ -24,7 +24,7 @@ module.exports = class DynamoDB {
 	addRecord (file_arn, event_time) {
 		console.log('inside add record');
 		return insertOrUpdate({
-			file_arn: file_arn,
+			file_name: file_arn,
 			created_time: event_time
 		});
 	}
@@ -32,7 +32,7 @@ module.exports = class DynamoDB {
 	updateDeleteTime (file_arn, event_time) {
 		return ddbScanAsync({
 			TableName: table_name,
-			FilterExpression : 'file_arn = :urn and attribute_not_exists(deleted_time)',
+			FilterExpression : 'file_name = :urn and attribute_not_exists(deleted_time)',
 			ExpressionAttributeValues: {
 				':urn': file_arn
 			}
