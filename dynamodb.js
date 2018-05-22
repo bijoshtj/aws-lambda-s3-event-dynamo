@@ -40,14 +40,12 @@ module.exports = class DynamoDB {
 		.then(resp => {
 			let record_count = resp.Items && resp.Items.length;
 
-            //console.log('record_count is: , ', )
 			if (record_count > 0) {
 				let record = resp.Items[0];
 
 				record.deleted_time = event_time;
 
 				return insertOrUpdate(record);
-
 			}
 
 			return false;
