@@ -1,0 +1,16 @@
+{
+  "name": "lambda_local",
+  "version": "0.0.1",
+  "description": "test lamda local development",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.244.1",
+    "bluebird": "^3.5.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Bijosh T J",
+  "license": "ISC"
+}

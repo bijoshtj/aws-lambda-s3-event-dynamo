@@ -1,0 +1,5 @@
+.*.swp
+npm-debug.log
+.npmrc
+node_modules
+package-lock.json
