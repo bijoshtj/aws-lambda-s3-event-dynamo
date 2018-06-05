@@ -63,7 +63,12 @@ exports.handler = (event, context, callback) => {
             resp_promise
             	.then(resp => {
             		callback(null, resp);
+
+                    return dynamo_db.listAllFiles();
             	})
+                .then(all_files => {
+                    console.log('all files here..', all_files);
+                })
             	.catch(err => {
 			console.log('error is: ', err);
             		callback('Error occured');

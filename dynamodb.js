@@ -60,6 +60,24 @@ module.exports = class DynamoDB {
 			});
 	}
 
+	listAllFiles () {
+		return ddbScanAsync({
+			TableName: table_name
+		})
+		.then(resp => {
+			let record_count = resp.Items && resp.Items.length;
+			let files = [];
+
+			if (record_count > 0) {
+				resp.Items.forEach(curr => {
+					files.push(curr.file_name);
+				});				
+			}
+
+			return files;
+		});
+	}
+
 	addRecord (file_arn, event_time) {
 		console.log('inside add record');
 		return insertOrUpdate({
