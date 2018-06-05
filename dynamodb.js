@@ -1,7 +1,9 @@
-const bluebird = require('bluebird');
-const table_name = require('./config').dynamo_s3_event_table;
+let config = require('./config');
 
-var ddbScanAsync, ddbPutAsync;
+const bluebird = require('bluebird');
+const table_name = config.dynamo_s3_event_table;
+
+var ddbScanAsync, ddbPutAsync, ddbDescribeTableAsync, ddbCreateTableAsync;
 
 let insertOrUpdate = function (params) {
 	console.log(params);
@@ -12,13 +14,50 @@ let insertOrUpdate = function (params) {
 	.return(true);
 };
 
+
 module.exports = class DynamoDB {
 	constructor (AWS) {
 		let doc_client = new AWS.DynamoDB.DocumentClient();
+		let ddb_obj = new AWS.DynamoDB();
 
 		ddbPutAsync = bluebird.promisify(doc_client.put, {context: doc_client});
 		ddbScanAsync = bluebird.promisify(doc_client.scan, {context: doc_client});
+
+
+		ddbDescribeTableAsync = bluebird.promisify(ddb_obj.describeTable, {context: ddb_obj});
+		ddbCreateTableAsync = bluebird.promisify(ddb_obj.createTable, {context: ddb_obj});
+
+
 		console.log('inside constructor');
+	}
+
+	initialize () {
+
+		return ddbDescribeTableAsync({
+				TableName: table_name
+			})
+			.catch(err => {
+				console.log('ddb describe error', err);
+				if (err && err.code === 'ResourceNotFoundException') {
+					return false;
+				} else {
+					throw err;
+				}
+			})
+			.then(resp => {
+				if (resp) {
+					console.log('table already exists....')
+					return true;
+				} else {
+					console.log('CReating table .......')
+					return ddbCreateTableAsync(config.table_schema);
+				}
+			})
+			.return(true)
+			.catch(err => {
+				console.log('error loading table', err);
+				return false;
+			});
 	}
 
 	addRecord (file_arn, event_time) {

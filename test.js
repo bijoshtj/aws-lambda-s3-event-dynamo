@@ -76,7 +76,7 @@ let delete_data = {
   ]
 };
 
-index.handler(delete_data, {}, function (err, success) {
+index.handler(create_data, {}, function (err, success) {
 	if (err) {
 		console.log('error occured', err);
 	} else {

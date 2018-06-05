@@ -6,6 +6,7 @@ const DynamoDB = require('./dynamodb');
 const config = require('./config');
 
 let aws_config = config.aws_config;
+let db_loaded = false;
 
 if (process.env.NODE_ENV === 'DEVELOPMENT') {
 	aws_config = config.aws_config_dev
@@ -16,11 +17,22 @@ console.log('Updating AWS config: ', aws_config);
 AWS.config.update(aws_config);
 let dynamo_db = new DynamoDB(AWS);
 
+dynamo_db.initialize()
+    .then(res => {
+        console.log('dynamodb loaded....... ', res)
+        db_loaded = res;
+    });
+
 
 exports.handler = (event, context, callback) => {
     console.log('in first line');
     
     let tracked_events = config.events;
+
+    if (!db_loaded) {
+        console.log('retry_event_data', event);
+        return callback('DB not loaded!!!');
+    }
     
     if (event && event.Records) {
         console.log('before for loop');
@@ -53,6 +65,7 @@ exports.handler = (event, context, callback) => {
             		callback(null, resp);
             	})
             	.catch(err => {
+			console.log('error is: ', err);
             		callback('Error occured');
             	});
         });
