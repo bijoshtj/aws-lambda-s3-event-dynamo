@@ -25,9 +25,10 @@ dynamo_db.initialize()
 
 
 exports.handler = (event, context, callback) => {
-    console.log('in first line');
+    //console.log('in first line');
     
     let tracked_events = config.events;
+    
 
     if (!db_loaded) {
         console.log('retry_event_data', event);
@@ -35,7 +36,9 @@ exports.handler = (event, context, callback) => {
     }
     
     if (event && event.Records) {
-        console.log('before for loop');
+        //console.log('before for loop');
+        let promise_arr = [];
+
         event.Records.forEach(curr => {
             console.log('Inside forloop');
             let resp_promise = null;
@@ -60,20 +63,24 @@ exports.handler = (event, context, callback) => {
             	resp_promise = bluebird.reject('Unsupported action');
             }
 
-            resp_promise
-            	.then(resp => {
-            		callback(null, resp);
+            promise_arr.push(resp_promise);
+        });
+
+        bluebird.all(promise_arr)
+                .then(resp => {
+                    callback(null, resp);
 
                     return dynamo_db.listAllFiles();
-            	})
-                .then(all_files => {
-                    console.log('all files here..', all_files);
                 })
-            	.catch(err => {
-			console.log('error is: ', err);
-            		callback('Error occured');
-            	});
-        });
+                .then(all_files => {
+                    console.log('Total No. of records: ', all_files.length);
+                    console.log('Files: ', all_files);
+                })
+                .catch(err => {
+                    console.log('error is: ', err);
+                    callback('Error occured');
+                });
+
     } else {
         callback(null, 'Hello from Lambda');
     }
